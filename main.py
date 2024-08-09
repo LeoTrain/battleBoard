@@ -2,31 +2,7 @@ import pygame
 import random
 from typing import List, Tuple
 from player import Player
-
-def createFloor(startingPos: Tuple[int, int]) -> List[dict]:
-    posX, posY = startingPos
-    floor = []
-    badCells = random.randint(20, 40)
-    for i in range(numCells):
-        posX = startingPos[0]
-        for i in range(numCells):
-            rectangle = pygame.Rect(posX, posY, cellWidth, cellHeight)
-            if badCells > 0:
-                randomNumber = random.randint(1, 7)
-                color = "red" if randomNumber == 4 else "blue"
-                badCells -= 1 if color == "red" else 0
-            else:
-                color = "blue"
-            floor.append({'rectangle': rectangle, 'color': color})
-            posX += cellWidth
-        posY += cellHeight
-    return floor
-
-def drawFloor(screen, floor):
-    for cell in floor:
-        pygame.draw.rect(screen, cell['color'], cell['rectangle'])
-        pygame.draw.rect(screen, 'black', cell['rectangle'], 1)
-
+from boardCreation import getFloor, drawFloor
 
 pygame.init()
 
@@ -47,7 +23,7 @@ running = True
 startingX = (screenWidth - boardSize) // 2
 startingY = (screenHeight - boardSize) // 2
 startingPos = (startingX, startingY)
-floor = createFloor(startingPos)
+floor = getFloor(startingPos, (cellSize, cellSize), numCells)
 
 player = Player("yellow", cellWidth - 10, cellHeight - 10, (cellSize, cellSize), floor)
 playerStartX = ((screenWidth - boardSize) // 2) + 5
