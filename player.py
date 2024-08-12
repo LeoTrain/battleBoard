@@ -2,7 +2,7 @@ import pygame
 from typing import Tuple, List
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, color: str, width: int, height: int, cellSize: Tuple[int, int], floor: List[dict]):
+    def __init__(self, color: str, width: int, height: int, cellSize: Tuple[int, int], floor: List[dict], surface: dict):
         super().__init__()
         self.image = pygame.Surface((width, height))
         self.image.fill(color)
@@ -11,7 +11,10 @@ class Player(pygame.sprite.Sprite):
         self.selected = False
         self.cellSize = cellSize
         self.movementRange = 2
-    
+        self.surface = surface
+        self.attacks = self.getAttacks()
+        self.attackSelected = False
+
     def  moove(self, wantedPosition: Tuple[int, int]):
         allowedCells = self.getPlayerAllowedCells()
         for cell in allowedCells:
@@ -36,26 +39,34 @@ class Player(pygame.sprite.Sprite):
                 allowedCells.append(cell)    
         return allowedCells
 
-    def getAttacks(self, surface):
-        attacks = []
-        surfaceSize = list(surface.get_size())
+    def getAttacks(self) -> List[dict]:
+        attacks = {}
+        surfaceSize = list(self.surface.get_size())
         surfaceSize[0] = (surfaceSize[0] // 5) * 4
         surfaceSize[1] = surfaceSize[1] // 5
         for i in range(3):
             attack = pygame.Rect(surfaceSize[0], surfaceSize[1], 100, 100)
+            attacks[f'attack_{i}'] = {'rectangle': attack, 'color': 'white', 'active': False}
             surfaceSize[1] += 150
-            attacks.append(attack)
+
         return attacks
 
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
+    def initiateAttack(self, attack_key) -> None:
+        self.attacks[attack_key]['color'] = "red"
+                    
+    def update(self) -> None:
+        pass
+
+    def draw(self):
+        self.surface.blit(self.image, self.rect)
         if self.selected:
             allowedCells = self.getPlayerAllowedCells()
             for cell in allowedCells:
-                pygame.draw.rect(surface, 'yellow', cell['rectangle'], 1)
-            
-            attacks = self.getAttacks(surface)
-            for attack in attacks:
-                image = pygame.Surface((attack.width, attack.height))
-                image.fill("white")
-                surface.blit(image, attack)
+                pygame.draw.rect(self.surface, 'yellow', cell['rectangle'], 1)
+                
+        for attack_key, attack_info in self.attacks.items():
+            color = attack_info['color']
+            rectangle = attack_info['rectangle']
+            image = pygame.Surface((rectangle.width, rectangle.height))
+            image.fill(color)
+            self.surface.blit(image, rectangle)

@@ -4,6 +4,15 @@ from typing import List, Tuple
 from player import Player
 from boardCreation import getFloor, drawFloor
 
+def isCollidingWithRec(rect: dict, mousPos: Tuple[int, int]) -> bool:
+    if ((rect.left <= mousePos[0] & mousePos[0] <= rect.right) &
+        (rect.top <= mousePos[1] & mousePos[1] <= rect.bottom)):
+        return True
+    else:
+        return False
+
+
+
 pygame.init()
 
 screenWidth = 1280
@@ -25,7 +34,7 @@ startingY = (screenHeight - boardSize) // 2
 startingPos = (startingX, startingY)
 floor = getFloor(startingPos, (cellSize, cellSize), numCells)
 
-player = Player("yellow", cellWidth - 10, cellHeight - 10, (cellSize, cellSize), floor)
+player = Player("yellow", cellWidth - 10, cellHeight - 10, (cellSize, cellSize), floor, screen)
 playerStartX = ((screenWidth - boardSize) // 2) + 5
 playerStartY = ((screenHeight - boardSize) // 2) + 5
 player.rect.topleft = (playerStartX, playerStartY)
@@ -36,17 +45,24 @@ while running:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mousePos = pygame.mouse.get_pos()
-            if ((player.rect.left <= mousePos[0] & mousePos[0] <= player.rect.right) &
-                (player.rect.top <= mousePos[1] & mousePos[1] <= player.rect.bottom)):
+            if isCollidingWithRec(player.rect, mousePos):
                 if not player.selected:
                     player.selected = True
             elif player.selected == True:
-                player.moove(mousePos)
+                attackInitialized = False
+                for attack_key, attack_info in player.attacks.items():
+                    if isCollidingWithRec(attack_info['rectangle'], mousePos):
+                        player.initiateAttack(attack_key)
+                        attackInitialized = True
+                if not attackInitialized:
+                    player.moove(mousePos)
+                player.selected = False
 
     drawFloor(screen, floor)
-    player.draw(screen)
+    player.draw()
     pygame.display.flip()
     clock.tick(60)
+
 
 pygame.quit()
 
