@@ -14,6 +14,8 @@ class Player(pygame.sprite.Sprite):
         self.surface = surface
         self.attacks = self.getAttacks()
         self.attackSelected = False
+        self.lifePoints = 10
+        self.wasOnBadCell = False
 
     def  moove(self, wantedPosition: Tuple[int, int]):
         allowedCells = self.getPlayerAllowedCells()
@@ -21,6 +23,7 @@ class Player(pygame.sprite.Sprite):
             if (((cell['rectangle'].left <= wantedPosition[0]) & (wantedPosition[0] <= cell['rectangle'].right)) &
                 ((cell['rectangle'].top <= wantedPosition[1]) & (wantedPosition[1] <= cell['rectangle'].bottom))):
                 self.rect.center = cell['rectangle'].center
+                self.wasOnBadCell = False
         self.selected = False
     
     def getPlayerAllowedCells(self) -> List[dict]:
@@ -53,7 +56,16 @@ class Player(pygame.sprite.Sprite):
 
     def initiateAttack(self, attack_key) -> None:
         self.attacks[attack_key]['color'] = "red"
-                    
+
+    def isOnBadCell(self) -> bool:
+        returnValue = False
+        if not self.wasOnBadCell:
+            for cell in self.floor:
+                if self.rect.colliderect(cell['rectangle']) and cell['color'] == 'red':
+                    returnValue = True
+                    self.wasOnBadCell = True
+        return returnValue
+
     def update(self) -> None:
         pass
 

@@ -63,6 +63,10 @@ while running:
     pygame.display.flip()
     clock.tick(60)
 
+    if player.isOnBadCell():
+        player.lifePoints -= 1
+        print(player.lifePoints)
+
 
 pygame.quit()
 
